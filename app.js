@@ -1,15 +1,19 @@
-
+require('dotenv').config()
 const express=require("express")
 const mongoose=require("mongoose")
 const bodyParser=require("body-parser")
 const app=express()
 const User=require("./models/user")
+const cookieParser = require('cookie-parser')
+const cors = require('cors')
+const PORT=process.env.PORT
 
 
 
-var DB_CONNECTION_STRING='mongodb://localhost:27017/ecom'
+app.use(cookieParser())
+app.use(cors())
+app.use(bodyParser.json())
 
-var jsonParser = bodyParser.json()
 
 app.get('/', (req, res) => {
     
@@ -17,7 +21,7 @@ app.get('/', (req, res) => {
   })
 
 
-app.post('/api/login',jsonParser,async (req, res) => {
+app.post('/api/login',async (req, res) => {
     
     try {
       const u=await User.findOne({email:req.body.email})
@@ -41,7 +45,7 @@ app.post('/api/login',jsonParser,async (req, res) => {
   })
 
 
-app.post('/api/signin', jsonParser,(req, res) => {
+app.post('/api/signin', (req, res) => {
     const u=new User(req.body)
     u.save()
     .then(()=>{return res.status(200).send(u)})
@@ -50,15 +54,14 @@ app.post('/api/signin', jsonParser,(req, res) => {
     
   })
 async function run(){
- await mongoose.connect(DB_CONNECTION_STRING, {
+ await mongoose.connect(process.env.DB_CONNECTION_STRING, {
     useNewUrlParser: true
   }, function () {  
-    console.log(' connection open ');
+    console.log('DB CONNECTED');
   })
 
 
- await app.listen('4000')
+ app.listen(PORT,()=>{console.log(`RUNNING ON PORT ${PORT}`)})
 
 }
 run()
-// TODO:make other schemas 
